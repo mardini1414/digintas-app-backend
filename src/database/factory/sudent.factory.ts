@@ -16,10 +16,11 @@ export async function studentFactory(number: number) {
   userDetail.phone_number = faker.phone.number('08############');
   userDetail.address = faker.address.streetAddress();
 
+  const role: any = Roles.STUDENT;
   const user = new User();
   user.username = `student${number}`;
   user.password = await Bcrypt.hash('@Dignitas123');
-  user.role = Roles.STUDENT;
+  user.role = role;
   user.userDetail = userDetail;
 
   const queryRunner = AppDataSource.createQueryRunner();

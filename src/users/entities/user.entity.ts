@@ -38,9 +38,9 @@ export class User {
     referencedColumnName: 'id',
     foreignKeyConstraintName: 'fk_user_role',
   })
-  role: string;
+  role: Role;
 
-  @OneToOne(() => UserDetail)
+  @OneToOne(() => UserDetail, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   @JoinColumn({
     name: 'user_detail_id',
     referencedColumnName: 'id',

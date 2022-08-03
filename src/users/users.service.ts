@@ -1,17 +1,28 @@
-import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpStatus,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Bcrypt } from '../helpers/bcrypt';
-import { DataSource } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { UserDetail } from './entities/user-detail.entity';
 import { User } from './entities/user.entity';
-import { Roles } from './role/role.enum';
+import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersService {
-  constructor(private dataSource: DataSource) {}
+  constructor(
+    private dataSource: DataSource,
+    @InjectRepository(User) private userRepository: Repository<User>,
+    @InjectRepository(UserDetail)
+    private userDetailRepository: Repository<UserDetail>,
+  ) {}
 
-  async create(createUserDto: CreateUserDto, roles: Roles) {
+  async create(createUserDto: CreateUserDto, roles: any) {
     const userDetail = new UserDetail();
     userDetail.name = createUserDto.name;
     userDetail.email = createUserDto.email;
@@ -46,19 +57,110 @@ export class UsersService {
     };
   }
 
-  findAll() {
-    return `This action returns all users`;
+  findAll(query: PaginateQuery, role: any): Promise<Paginated<User>> {
+    return paginate(query, this.userRepository, {
+      relations: ['role', 'userDetail'],
+      sortableColumns: ['created_at'],
+      searchableColumns: ['userDetail.name'],
+      defaultLimit: 5,
+      select: [
+        'id',
+        'username',
+        'role.id',
+        'role.name',
+        'userDetail.name',
+        'userDetail.email',
+        'userDetail.phone_number',
+        'userDetail.address',
+        'created_at',
+      ],
+      where: {
+        role: role,
+      },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string, role: any) {
+    return await this.userRepository
+      .findOneOrFail({
+        relations: {
+          role: true,
+          userDetail: true,
+        },
+        select: {
+          id: true,
+          username: true,
+          role: { id: true, name: true },
+          userDetail: {
+            name: true,
+            email: true,
+            phone_number: true,
+            address: true,
+          },
+          created_at: true,
+          updated_at: true,
+          deleted_at: true,
+        },
+        where: {
+          id: id,
+          role: {
+            id: role,
+          },
+        },
+      })
+      .catch((e) => {
+        throw new NotFoundException('user not found');
+      });
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: string, updateUserDto: UpdateUserDto, role: any) {
+    const user = await this.userRepository
+      .findOne({
+        relations: { userDetail: true },
+        select: { id: true, userDetail: { id: true } },
+        where: { id: id, role: { id: role } },
+      })
+      .catch((e) => {
+        throw new NotFoundException('user not found');
+      });
+
+    await this.userRepository.update(
+      { id, role },
+      {
+        username: updateUserDto.username,
+        password: await Bcrypt.hash(updateUserDto.password),
+      },
+    );
+
+    await this.userDetailRepository.update(user.userDetail.id, {
+      name: updateUserDto.name,
+      email: updateUserDto.email,
+      phone_number: updateUserDto.phone_number,
+      address: updateUserDto.address,
+    });
+
+    return {
+      status: HttpStatus.CREATED,
+      message: 'user has been updated successfully',
+    };
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: string, role: any) {
+    const remove = await this.userRepository.softDelete({
+      id: id,
+      role: { id: role },
+    });
+
+    if (remove.affected === 0) {
+      return {
+        status: HttpStatus.NOT_FOUND,
+        message: 'user not found',
+      };
+    }
+
+    return {
+      status: HttpStatus.OK,
+      message: 'user has been removed',
+    };
   }
 }

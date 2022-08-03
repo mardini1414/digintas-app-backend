@@ -12,10 +12,11 @@ export async function HeadMasterFactory() {
   userDetail.phone_number = '08142522627';
   userDetail.address = 'Jl.Melati no 23 Jakarta utara';
 
+  const role: any = Roles.HEAD_MASTER;
   const user = new User();
   user.username = 'headmaster123';
   user.password = await Bcrypt.hash('@HeadMaster123');
-  user.role = Roles.HEAD_MASTER;
+  user.role = role;
   user.userDetail = userDetail;
 
   const queryRunner = AppDataSource.createQueryRunner();
