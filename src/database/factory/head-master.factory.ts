@@ -1,4 +1,4 @@
-import { Roles } from '../../users/role/role.enum';
+import { Role } from '../../users/role/role.enum';
 import { AppDataSource } from '../seeder/seeder';
 import { User } from '../../users/entities/user.entity';
 import { Bcrypt } from '../../helpers/bcrypt';
@@ -12,7 +12,7 @@ export async function HeadMasterFactory() {
   userDetail.phone_number = '08142522627';
   userDetail.address = 'Jl.Melati no 23 Jakarta utara';
 
-  const role: any = Roles.HEAD_MASTER;
+  const role: any = Role.HEAD_MASTER;
   const user = new User();
   user.username = 'headmaster123';
   user.password = await Bcrypt.hash('@HeadMaster123');

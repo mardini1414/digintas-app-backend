@@ -1,6 +1,6 @@
-import { create } from './seeder';
+import { createOne } from './seeder';
 import { roleFactory } from '../factory/role.factory';
 
-create(() => {
+createOne(() => {
   roleFactory();
 });

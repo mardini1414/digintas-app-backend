@@ -6,19 +6,16 @@ import { UserDetail } from '../../users/entities/user-detail.entity';
 import { BadRequestException } from '@nestjs/common';
 import { faker } from '@faker-js/faker';
 
-export async function studentFactory(number: number) {
+export async function hrFactory(number: number) {
   const userDetail = new UserDetail();
   userDetail.name = faker.name.findName();
-  userDetail.email = faker.internet.email(
-    faker.name.firstName(),
-    `${faker.name.lastName()}${number}`,
-  );
+  userDetail.email = `hr${number}@dignitas.com`;
   userDetail.phone_number = faker.phone.number('08############');
   userDetail.address = faker.address.streetAddress();
 
-  const role: any = Role.STUDENT;
+  const role: any = Role.HR;
   const user = new User();
-  user.username = `student${number}`;
+  user.username = `hr${number}`;
   user.password = await Bcrypt.hash('@Dignitas123');
   user.role = role;
   user.userDetail = userDetail;

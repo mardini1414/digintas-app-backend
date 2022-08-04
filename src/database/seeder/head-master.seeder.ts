@@ -1,6 +1,6 @@
-import { create } from './seeder';
+import { createOne } from './seeder';
 import { HeadMasterFactory } from '../factory/head-master.factory';
 
-create(() => {
+createOne(() => {
   HeadMasterFactory();
 });

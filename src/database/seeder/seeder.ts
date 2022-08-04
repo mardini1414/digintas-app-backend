@@ -24,13 +24,10 @@ export function createMany(number: number, callBack: Function) {
     })
     .catch((err) => {
       console.error('Error during Data Source initialization', err);
-    })
-    .finally(() => {
-      console.log('insert is completed');
     });
 }
 
-export function create(callBack: Function) {
+export function createOne(callBack: Function) {
   AppDataSource.initialize()
     .then(() => {
       console.log('Data Source has been initialized!');

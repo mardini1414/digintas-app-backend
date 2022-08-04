@@ -80,7 +80,38 @@ export class UsersService {
     });
   }
 
-  async findOne(id: string, role: any) {
+  async findOneByUsername(username: string) {
+    return await this.userRepository
+      .findOneOrFail({
+        relations: {
+          role: true,
+          userDetail: true,
+        },
+        select: {
+          id: true,
+          username: true,
+          password: true,
+          role: { id: true, name: true },
+          userDetail: {
+            name: true,
+            email: true,
+            phone_number: true,
+            address: true,
+          },
+          created_at: true,
+          updated_at: true,
+          deleted_at: true,
+        },
+        where: {
+          username: username,
+        },
+      })
+      .catch((e) => {
+        throw new NotFoundException('user not found');
+      });
+  }
+
+  async findOne(id: string) {
     return await this.userRepository
       .findOneOrFail({
         relations: {
@@ -103,9 +134,6 @@ export class UsersService {
         },
         where: {
           id: id,
-          role: {
-            id: role,
-          },
         },
       })
       .catch((e) => {
@@ -113,24 +141,21 @@ export class UsersService {
       });
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto, role: any) {
+  async update(id: string, updateUserDto: UpdateUserDto) {
     const user = await this.userRepository
       .findOne({
         relations: { userDetail: true },
         select: { id: true, userDetail: { id: true } },
-        where: { id: id, role: { id: role } },
+        where: { id: id },
       })
       .catch((e) => {
         throw new NotFoundException('user not found');
       });
 
-    await this.userRepository.update(
-      { id, role },
-      {
-        username: updateUserDto.username,
-        password: await Bcrypt.hash(updateUserDto.password),
-      },
-    );
+    await this.userRepository.update(id, {
+      username: updateUserDto.username,
+      password: await Bcrypt.hash(updateUserDto.password),
+    });
 
     await this.userDetailRepository.update(user.userDetail.id, {
       name: updateUserDto.name,
@@ -145,11 +170,8 @@ export class UsersService {
     };
   }
 
-  async remove(id: string, role: any) {
-    const remove = await this.userRepository.softDelete({
-      id: id,
-      role: { id: role },
-    });
+  async remove(id: string) {
+    const remove = await this.userRepository.softDelete({ id: id });
 
     if (remove.affected === 0) {
       return {

@@ -1,8 +1,17 @@
-import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Put,
+} from '@nestjs/common';
 import { Paginate, PaginateQuery } from 'nestjs-paginate';
 import { CreateUserDto } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
-import { Roles } from '../role/role.enum';
+import { Role } from '../role/role.enum';
 import { UsersService } from '../users.service';
 
 @Controller('hr')
@@ -11,16 +20,29 @@ export class HrController {
 
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
-    this.userService.create(createUserDto, Roles.HR);
+    return this.userService.create(createUserDto, Role.HR);
   }
 
   @Get()
   findAll(@Paginate() query: PaginateQuery) {
-    return this.userService.findAll(query, Roles.HR);
+    return this.userService.findAll(query, Role.HR);
+  }
+
+  @Get(':id')
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.userService.findOne(id);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(id, updateUserDto, Roles.HR);
+  update(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.update(id, updateUserDto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id', ParseUUIDPipe) id: string) {
+    return this.userService.remove(id);
   }
 }
