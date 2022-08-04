@@ -94,13 +94,7 @@ export class UsersService {
           role: { id: true, name: true },
           userDetail: {
             name: true,
-            email: true,
-            phone_number: true,
-            address: true,
           },
-          created_at: true,
-          updated_at: true,
-          deleted_at: true,
         },
         where: {
           username: username,
