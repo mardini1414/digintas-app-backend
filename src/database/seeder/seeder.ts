@@ -21,6 +21,7 @@ export function createMany(number: number, callBack: Function) {
       for (let i = 1; i <= number; i++) {
         callBack(i);
       }
+      console.log('Insert complete');
     })
     .catch((err) => {
       console.error('Error during Data Source initialization', err);
@@ -36,8 +37,5 @@ export function createOne(callBack: Function) {
     })
     .catch((err) => {
       console.error('Error during Data Source initialization', err);
-    })
-    .finally(() => {
-      console.log('insert is completed');
     });
 }

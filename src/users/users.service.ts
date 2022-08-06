@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Bcrypt } from '../helpers/bcrypt';
 import { DataSource, Repository } from 'typeorm';
@@ -101,7 +102,7 @@ export class UsersService {
         },
       })
       .catch((e) => {
-        throw new NotFoundException('user not found');
+        throw new UnauthorizedException();
       });
   }
 

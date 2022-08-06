@@ -1,5 +1,5 @@
 import { HttpStatus, Injectable, Res } from '@nestjs/common';
-import { Bcrypt } from 'src/helpers/bcrypt';
+import { Bcrypt } from '../helpers/bcrypt';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 
@@ -20,10 +20,9 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { ...user };
     return {
-      status: HttpStatus.OK,
-      access_token: this.jwtService.sign(payload),
+      status: HttpStatus.CREATED,
+      access_token: this.jwtService.sign(user),
     };
   }
 }
